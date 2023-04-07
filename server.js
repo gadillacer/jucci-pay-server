@@ -24,10 +24,10 @@ app.use(express.json());
 
 // Replace 'your-frontend-domain.com' with your actual domain
 const corsOptions = {
-  origin: 'https://your-frontend-domain.com',
+  origin: 'https://juccipay.vercel.app',
   optionsSuccessStatus: 200,
 };
-app.use(cors());
+app.use(cors(corsOptions));
 // app.use(helmet());
 
 // Debug
