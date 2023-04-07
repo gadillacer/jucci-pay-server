@@ -9,6 +9,7 @@ const helmet = require('helmet');
 const redis = require('redis');
 const cache = require('express-redis-cache')({ client: redis.createClient() });
 const LRU = require('lru-cache');
+require('dotenv').config();
 
 
 const { MongoClient } = require('mongodb');
@@ -31,22 +32,22 @@ app.use(cors());
 
 // Debug
 
-const uri = 'mongodb://localhost:27017';
+const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const client = new MongoClient(uri);
 
 // Web3 section
 
-const provider = new ethers.providers.JsonRpcProvider('https://polygon-mumbai.g.alchemy.com/v2/hsCd_Sd5bs_1GpGW3tbtLcQcLrPmZXB-');
-const web3 = new Web3('https://polygon-mumbai.g.alchemy.com/v2/hsCd_Sd5bs_1GpGW3tbtLcQcLrPmZXB-');
+const provider = new ethers.providers.JsonRpcProvider(process.env.ALCHEMY_MUMBAI_RPC_URL || "https://polygon-mumbai.g.alchemy.com/v2/hsCd_Sd5bs_1GpGW3tbtLcQcLrPmZXB-");
+const web3 = new Web3(process.env.ALCHEMY_MUMBAI_RPC_URL || "https://polygon-mumbai.g.alchemy.com/v2/hsCd_Sd5bs_1GpGW3tbtLcQcLrPmZXB-");
 
-const poolContractAddress = '0xF8A694157F6C8ddA0b5243554bCA06e76Ec15D2A';
-const thirdPartyContractAddress = '0x295609fDCa9C61D0362DA36020E02fdc0164D86b';
+const poolContractAddress = process.env.DEPOSIT_GATEWAY_CONTRACT_ADDRESS || '0xF8A694157F6C8ddA0b5243554bCA06e76Ec15D2A';
+const thirdPartyContractAddress = process.env.BICONOMY_GAS_TANK_CONTRACT_ADDRESS || '0x295609fDCa9C61D0362DA36020E02fdc0164D86b';
 
 const poolContract = new ethers.Contract(poolContractAddress, Pool, provider);
 const thirdPartyContract = new ethers.Contract(thirdPartyContractAddress, ThirdPartyContract, provider);
 
 // Replace these with your private key
-const privateKey = '0xda2f2bce1f55ec711f40604371acfc7b8d1615f5f9a04ba1c006b16d71025130';
+const privateKey = process.env.PRIVATE_KEY;
 const wallet = new ethers.Wallet(privateKey, provider);
 
 const dappBalanceCache = new LRU({ max: 100, maxAge: 1000 * 60 * 5 }); // Cache up to 100 items for 5 minutes
@@ -62,7 +63,15 @@ const apiLimiter = rateLimit({
 app.get('/api/projects', async (req, res) => {
   await client.connect();
   const projects = await client.db('myDatabase').collection('projects').find().toArray();
-  res.json(projects);
+
+  const modifiedProjects = projects.map(project => {
+    return {
+      ...project,
+      apiKey: "hidden"
+    };
+  });
+
+  res.json(modifiedProjects);
 });
 
 app.post('/api/projects', async (req, res) => {
@@ -98,6 +107,7 @@ app.get('/api/projects/:id', async (req, res) => {
   }
 
   project.dappBalance = dappBalance.toString(); // Add the dapp balance to the project object
+  project.apiKey = ""
 
   res.json(project);
 });
