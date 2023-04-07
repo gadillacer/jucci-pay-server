@@ -1,13 +1,12 @@
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 const { ethers } = require('ethers');
 const Web3 = require('web3');
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const helmet = require('helmet');
-const redis = require('redis');
-const cache = require('express-redis-cache')({ client: redis.createClient() });
+// const redis = require('redis');
+// const cache = require('express-redis-cache')({ client: redis.createClient() });
 const LRU = require('lru-cache');
 require('dotenv').config();
 
@@ -23,12 +22,12 @@ const app = express();
 app.use(express.json());
 
 // Replace 'your-frontend-domain.com' with your actual domain
-const corsOptions = {
-  origin: 'https://juccipay.vercel.app',
-  optionsSuccessStatus: 200,
-};
-app.use(cors(corsOptions));
-// app.use(helmet());
+// const corsOptions = {
+//   origin: 'https://juccipay.vercel.app',
+//   optionsSuccessStatus: 200,
+// };
+app.use(cors());
+app.use(helmet());
 
 // Debug
 
