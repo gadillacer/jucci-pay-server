@@ -97,13 +97,16 @@ app.get('/api/projects/:id', async (req, res) => {
   }
 
   const decryptedApiKey = project.apiKey;
-  let dappBalance = dappBalanceCache.get(decryptedApiKey);
+  let dappBalance = await thirdPartyContract.getBalance(decryptedApiKey);
 
+  /*
+  let dappBalance = dappBalanceCache.get(decryptedApiKey);
   if (dappBalance === undefined) {
     // Read the dapp balance from the DappGasTank Contract if it's not in the cache
     dappBalance = await thirdPartyContract.getBalance(decryptedApiKey);
     dappBalanceCache.set(decryptedApiKey, dappBalance);
   }
+  */
 
   project.dappBalance = dappBalance.toString(); // Add the dapp balance to the project object
   project.apiKey = ""
