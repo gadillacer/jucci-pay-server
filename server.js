@@ -40,7 +40,7 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.ALCHEMY_MUMBAI
 const web3 = new Web3(process.env.ALCHEMY_MUMBAI_RPC_URL || "https://polygon-mumbai.g.alchemy.com/v2/hsCd_Sd5bs_1GpGW3tbtLcQcLrPmZXB-");
 
 const poolContractAddress = process.env.DEPOSIT_GATEWAY_CONTRACT_ADDRESS || '0xF8A694157F6C8ddA0b5243554bCA06e76Ec15D2A';
-const thirdPartyContractAddress = process.env.BICONOMY_GAS_TANK_CONTRACT_ADDRESS || '0x295609fDCa9C61D0362DA36020E02fdc0164D86b';
+const thirdPartyContractAddress = process.env.BICONOMY_GAS_TANK_CONTRACT_ADDRESS || '0x18b76535346A58715e7e0aC7C599A2B3f0294D28';
 
 const poolContract = new ethers.Contract(poolContractAddress, Pool, provider);
 const thirdPartyContract = new ethers.Contract(thirdPartyContractAddress, ThirdPartyContract, provider);
@@ -101,7 +101,7 @@ app.get('/api/projects/:id', async (req, res) => {
 
   if (dappBalance === undefined) {
     // Read the dapp balance from the DappGasTank Contract if it's not in the cache
-    dappBalance = await thirdPartyContract.dappBalances(decryptedApiKey);
+    dappBalance = await thirdPartyContract.getBalance(decryptedApiKey);
     dappBalanceCache.set(decryptedApiKey, dappBalance);
   }
 
@@ -195,7 +195,7 @@ app.post('/api/projects/:id/deposit', async (req, res) => {
 
 
     // Respond with a success message
-    res.status(200).json({ message: 'Deposit successful!' });
+    res.status(200).json({ message: 'Deposit gas successful!' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
